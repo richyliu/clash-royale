@@ -1,15 +1,11 @@
 class Game {
-    constructor(timeout) {
+    constructor(timeout, loopTime=200) {
         this.stage = new createjs.Stage('canvas');
         this.entities = {};
         
         this.mainLoop = setInterval(() => {
-            this.stage.clear();
-            for (let id in this.entities) {
-                this.stage.addChild(this.entities[id]);
-            }
             this.stage.update();
-        }, 200);
+        }, loopTime);
         
         setTimeout(() => {
             clearInterval(this.mainLoop);
@@ -17,8 +13,8 @@ class Game {
     }
     
     
-    set(id, entity) {
-        this.entities[id] = entity;
+    add(entity) {
+        this.stage.addChild(entity);
     }
     
     

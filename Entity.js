@@ -1,23 +1,18 @@
 class Entity {
-    constructor(game, x, y) {
-        this.id = Math.random() + '';
+    constructor(game, field, x, y, color='DeepSkyBlue', size=10) {
         this.game = game;
+        this.field = field;
+        this.id = Math.random + '';
+        this.size = size;
         
         this.shape = new createjs.Shape();
-        this.shape.graphics.beginFill('DeepSkyBlue').drawCircle(0, 0, 50);
         this.shape.x = x;
         this.shape.y = y;
-        this.update();
-    }
-    
-    update() {
-        this.game.set(this.id, this.shape);
+        this.shape.graphics.beginFill(color).drawCircle(x, y, size);
+        this.game.add(this.shape);
     }
     
     move(dx, dy) {
-        this.shape.x += dx;
-        this.shape.y += dy;
-        console.log(this.shape.x);
-        this.update();
+        this.field.requestMove(this, this.shape.x+dx, this.shape.y+dy);
     }
 }
