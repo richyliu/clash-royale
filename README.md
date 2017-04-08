@@ -8,4 +8,4 @@ and ES6.
 Usage
 -----
 
-Open `index.html` in your browser
+Go to [https://richyliu.github.io/clash-royale/](https://richyliu.github.io/clash-royale/) in your browser
