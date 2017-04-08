@@ -1,5 +1,5 @@
 class Game {
-    constructor(timeout, loopTime=200) {
+    constructor(timeout, loopTime=15) {
         this.stage = new createjs.Stage('canvas');
         this.entities = {};
         

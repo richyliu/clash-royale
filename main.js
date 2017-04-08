@@ -12,17 +12,19 @@ function init1() {
 
 
 
-function init() {
-    let game = new Game(10 * 1000);
-    let field = new Field(game.stage);
-    
-    // let goblin = new Entity(game, field, 0, 0, 'green');
-    let barb = new Entity(game, field, 187, 313, 'yellow');
-    
-    field.add(barb);
-    
-    Helper.loop(() => {
-        // goblin.move(20, 20);
-        // barb.move(10, 0);
-    }, 200, 2000);
-}
+let game = new Game(100 * 1000);
+let field = new Field(game.stage);
+
+let goblin = new Entity(game, field, 0, 0, 'green');
+let barb = new Entity(game, field, 100, 100, 'yellow');
+
+field.add(barb);
+field.add(goblin);
+
+Helper.loop(() => {
+    goblin.move(1, 1);
+    barb.move(0.5, 0);
+}, 15, 2000);
+
+
+function init() {}

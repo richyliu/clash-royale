@@ -33,10 +33,10 @@ class Field {
     }
     
     requestMove(entity, x, y) {
-        for (let ent of this.entities) {
-            if (Math.sqrt(ent.x**2-x + ent.y**2-y) < entity.size) return false;
-        }
-        console.log(`x: ${x}, y:${y}`);
+        // for (let ent of this.entities) {
+        //     if (Math.sqrt(ent.x**2-x + ent.y**2-y) < entity.size) return false;
+        // }
+        // console.log(`x: ${x}, y:${y}`);
         
         entity.shape.x = x;
         entity.shape.y = y;
