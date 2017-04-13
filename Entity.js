@@ -3,15 +3,14 @@ class Entity {
      * Creates new entity
      * @type {Number} x - X position of the Entity
      * @type {Number} y - Y position of the Entity
-     * @type {Number} size - Radius of the Entity
-     * @type {String} color - Color of entity
+     * @type {Boolean} team - Team the Entity is on
      */
-    constructor(x, y, size, color) {
+    constructor(x, y, team) {
         /**
          * Radius of the circle to draw
          * @type {Number}
          */
-        this.size = size;
+        this.size = 0;
         /**
          * The current enemy the Entity is locked on.
          * @type {Entity}
@@ -27,6 +26,11 @@ class Entity {
          * @type {Number}
          */
         this.y = y;
+        /**
+         * Team the Entity is on. true for team on bottom, false for team on top.
+         * @type {Boolean}
+         */
+        this.team = team;
         /**
          * Used to ensure every Entity is identical
          * @type {Number}
@@ -109,24 +113,28 @@ class Entity {
          * @type {Boolean}
          */
         this.flyingTroop = false;
-        /**
-         * Team the Entity is on. true for team on bottom, false for team on top.
-         * @type {Boolean}
-         */
-        this.team = true;
-        
+    }
+    
+    
+    
+    /**
+     * Setup the Entity. Call this after setting class variables but before
+     * everything else
+     */
+    setup() {
+        this.health = this.totalHealth;
         
         this.shape = new createjs.Shape();
-        this.shape.x = x;
-        this.shape.y = y;
-        this.shape.graphics.beginFill(color).drawCircle(0, 0, this.size);
+        this.shape.x = this.x;
+        this.shape.y = this.y;
+        this.shape.graphics.beginFill(this.color).drawCircle(0, 0, this.size);
         
         this.healthBar = new createjs.Shape();
         this.healthBar.x = this.x - this.size;
         this.healthBar.y = this.y - this.size - 10;
-        this.healthBar.graphics.beginFill('blue').drawRect(0, 0, this.size*2, 10);
+        this.healthBar.graphics.beginFill(this.team ? 'blue' : 'red').drawRect(0, 0, this.size*2, 10);
         
-        Field.add(this, this.flyingTroop);
+        Field.add(this);
     }
     
     
@@ -164,6 +172,7 @@ class Entity {
      */
     damage(damage) {
         this.health -= damage;
+        if (this.health <= 0) this.death();
     }
     
     
@@ -172,6 +181,10 @@ class Entity {
      * Called when the Entity dies
      */
     death() {
+        // remove this from air/groundEntities
+        let troops = Field[this.flyingTroop ? 'air' : 'ground' + 'Entities'];
+        troops.slice(troops.indexOf(this), 1);
+        
         Field.stage.removeChild(this.shape);
         Field.stage.removeChild(this.healthBar);
     }

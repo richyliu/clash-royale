@@ -7,10 +7,10 @@ class Spawner {
      * @type {Number} x - X position to spawn.
      * @type {Number} y - Y position to spawn.
      */
-    static spawn(entity, count, x, y) {
+    static spawn(entity, count, x, y, team) {
         setTimeout(() => {
             for (let i = 0; i < count; i++) {
-                new entity(x, y);
+                new entity(x + Math.random()*100, y + Math.random()*100, team);
             }
         }, entity.deploySpeed);
     }

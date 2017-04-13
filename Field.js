@@ -28,21 +28,8 @@ class Field {
         
         
         this.mainLoop = setInterval(() => {
-            this.groundEntities.forEach((entity, i) => {
+            this.groundEntities.concat(this.airEntities).forEach((entity, i) => {
                 entity.tick();
-                // remove dead entities
-                if (entity.health <= 0) {
-                    entity.death();
-                    this.groundEntities.splice(i, 1);
-                }
-            });
-            this.airEntities.forEach((entity, i) => {
-                entity.tick();
-                // remove dead entities
-                if (entity.health <= 0) {
-                    entity.death();
-                    this.airEntities.splice(i, 1);
-                }
             });
             this.stage.update();
         }, this.loopTime);
@@ -86,10 +73,10 @@ class Field {
      * @type {Entity} entity - Entity to add to the field
      * @type {Boolean} flying - Set to true if in air, or false if on ground
      */
-    static add(entity, flying) {
+    static add(entity) {
         this.stage.addChild(entity.shape);
         this.stage.addChild(entity.healthBar);
-        this[flying ? 'air' : 'ground' + 'Entities'].push(entity);
+        this[(entity.flyingTroop ? 'air' : 'ground') + 'Entities'].push(entity);
     }
     
     
@@ -97,6 +84,7 @@ class Field {
      * Stop the game loop
      */
     static stop() {
+        console.log('Field has been stopped');
         clearInterval(this.mainLoop);
     }
     
@@ -133,10 +121,10 @@ class Field {
         let nearest;
         for (let curEntity of this.groundEntities.concat(entity.attackAir ? this.airEntities : [])) {
             if (
-                this.getDistance(entity, curEntity) < nearestDistance &&    // if closest than before
-                curEntity != entity &&                                      // enemy not itself
+                this.getDistance(entity, curEntity) < nearestDistance &&    // if closest so far
+                curEntity.id != entity.id &&                                // enemy not itself
                 curEntity.team != entity.team &&                            // enemy on a different team
-                entity.attackBuilding ? curEntity.isBuilding : true         // has to be building if it's attacking building
+                (entity.attackBuilding ? curEntity.isBuilding : true)         // has to be building if it's attacking building
             ) {
                 nearestDistance = this.getDistance(entity, curEntity);
                 nearest = curEntity;
