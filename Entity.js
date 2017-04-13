@@ -13,15 +13,42 @@ class Entity {
          */
         this.size = size;
         /**
+         * The current enemy the Entity is locked on.
+         * @type {Entity}
+         */
+        this.target = undefined;
+        /**
+         * X position of the shape
+         * @type {Number}
+         */
+        this.x = x;
+        /**
+         * Y position of the shape
+         * @type {Number}
+         */
+        this.y = y;
+        /**
+         * Used to ensure every Entity is identical
+         * @type {Number}
+         */
+        this.id = Math.random();
+        /**
+         * Timestamp of when Entity last attacked.
+         * @type {Number}
+         */
+        this.lastAttack = 0;
+        
+        
+        /**
          * Total health the Entity can have
          * @type {Number}
          */
-        this.totalHealth = 1000000;
+        this.totalHealth = Infinity;
         /**
-         * Current health of the Entity
+         * Current health of the Entity. Set to totalHealth to begin
          * @type {Number}
          */
-        this.health = this.totalHealth;
+        this.health = Infinity;
         /**
          * Attack strength of the Entity. If splash, attack applied to all
          * Entities within targetRange;
@@ -34,11 +61,6 @@ class Entity {
          */
         this.attackSpeed = 0;
         /**
-         * Timestamp of when Entity last attacked.
-         * @type {Number}
-         */
-        this.lastAttack = 0;
-        /**
          * Whether or not the Entity attacks with splash. If true, targetRadius
          * has to be nonzero.
          * @type {Boolean}
@@ -50,6 +72,17 @@ class Entity {
          * @type {Boolean}
          */
         this.attackBuilding = false;
+        /**
+         * Whether or not the Entity attacks air troops. If true, target attacks
+         * air and ground troops.
+         * @type {Boolean}
+         */
+        this.attackAir = false;
+        /**
+         * Whether or not the Entity is a building. If true, speed has to be 0
+         * @type {Boolean}
+         */
+        this.isBuilding = false;
         /**
          * Speed at which the Entity moves. In pixels per milliseconds.
          * @type {Number}
@@ -72,25 +105,15 @@ class Entity {
          */
         this.deploySpeed = 0;
         /**
-         * The current enemy the Entity is locked on.
-         * @type {Entity}
+         * Whether or not Entity can fly.
+         * @type {Boolean}
          */
-        this.target = undefined;
+        this.flyingTroop = false;
         /**
-         * X position of the shape
-         * @type {Number}
+         * Team the Entity is on. true for team on bottom, false for team on top.
+         * @type {Boolean}
          */
-        this.x = x;
-        /**
-         * Y position of the shape
-         * @type {Number}
-         */
-        this.y = y;
-        /**
-         * Used to ensure every Entity is identical
-         * @type {Number}
-         */
-        this.id = Math.random();
+        this.team = true;
         
         
         this.shape = new createjs.Shape();
@@ -103,7 +126,7 @@ class Entity {
         this.healthBar.y = this.y - this.size - 10;
         this.healthBar.graphics.beginFill('blue').drawRect(0, 0, this.size*2, 10);
         
-        Field.add(this);
+        Field.add(this, this.flyingTroop);
     }
     
     
@@ -115,7 +138,6 @@ class Entity {
      * @type {Number} magnitude - How far to move the entity
      */
     move(direction, magnitude) {
-        console.log(direction);
         Field.requestMove(
             this,
             this.x + Math.sin(direction)*magnitude,
@@ -132,7 +154,6 @@ class Entity {
      */
     attack(entity, strength) {
         entity.damage(strength);
-        console.log(`attacking with ${strength} strength`);
     }
     
     
@@ -143,7 +164,6 @@ class Entity {
      */
     damage(damage) {
         this.health -= damage;
-        console.log(`recieved ${damage} damage`);
     }
     
     
@@ -152,7 +172,6 @@ class Entity {
      * Called when the Entity dies
      */
     death() {
-        console.log(`Entity ${this.id} died`);
         Field.stage.removeChild(this.shape);
         Field.stage.removeChild(this.healthBar);
     }
@@ -166,7 +185,7 @@ class Entity {
         this.healthBar.graphics.clear();
         this.healthBar.x = this.x - this.size;
         this.healthBar.y = this.y - this.size - 10;
-        this.healthBar.graphics.beginFill('blue').drawRect(0, 0, this.size*2 * (this.health/this.totalHealth), 10);
+        this.healthBar.graphics.beginFill(this.team ? 'blue' : 'red').drawRect(0, 0, this.size*2 * (this.health/this.totalHealth), 10);
     }
     
     
@@ -194,7 +213,7 @@ class Entity {
             }
         // if not locked on target, find one
         } else {
-            this.target = Field.nearestEnemy(this, this.attackBuilding);
+            this.target = Field.nearestEnemy(this);
         }
         
         

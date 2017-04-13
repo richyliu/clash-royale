@@ -5,18 +5,43 @@ class Field {
      * @type {Number} [loopTime=15] - Interval between each tick in milliseconds
      */
     static start(timeout, loopTime=15) {
+        /**
+         * The stage where everything is drawn (on canvas with id "canvas")
+         * @type {createjs}
+         */
         this.stage = new createjs.Stage('canvas');
-        this.entities = {};
+        /**
+         * List of Entities that are on the ground.
+         * @type {Array}
+         */
+        this.groundEntities = [];
+        /**
+         * List of Entities that are in the air.
+         * @type {Array}
+         */
+        this.airEntities = [];
+        /**
+         * How often each tick happens in milliseconds
+         * @type {Number}
+         */
         this.loopTime = loopTime;
         
         
         this.mainLoop = setInterval(() => {
-            this.entities.forEach((entity, i) => {
+            this.groundEntities.forEach((entity, i) => {
                 entity.tick();
                 // remove dead entities
                 if (entity.health <= 0) {
                     entity.death();
-                    this.entities.splice(i, 1);
+                    this.groundEntities.splice(i, 1);
+                }
+            });
+            this.airEntities.forEach((entity, i) => {
+                entity.tick();
+                // remove dead entities
+                if (entity.health <= 0) {
+                    entity.death();
+                    this.airEntities.splice(i, 1);
                 }
             });
             this.stage.update();
@@ -53,20 +78,18 @@ class Field {
         this.stage.addChild(rect);
         
         this.stage.update();
-        
-        
-        this.entities = [];
     }
     
     
     /**
-     * Add entity to the field
+     * Add entity to the field.
      * @type {Entity} entity - Entity to add to the field
+     * @type {Boolean} flying - Set to true if in air, or false if on ground
      */
-    static add(entity) {
+    static add(entity, flying) {
         this.stage.addChild(entity.shape);
         this.stage.addChild(entity.healthBar);
-        this.entities.push(entity);
+        this[flying ? 'air' : 'ground' + 'Entities'].push(entity);
     }
     
     
@@ -86,7 +109,7 @@ class Field {
      * @return {boolean} Whether or not move was accepted
      */
     static requestMove(entity, x, y) {
-        for (let ent of this.entities) {
+        for (let ent of this.groundEntities) {
             if (Math.sqrt(Math.pow(ent.x,2)-x + Math.pow(ent.y,2)-y) < entity.size+ent.size) return false;
         }
         
@@ -103,14 +126,18 @@ class Field {
     /**
      * Get the nearest enemy
      * @type {Entity} entity - Get nearest enemy to this entity
-     * @type {boolean} attackDefense - Attack buildings or normal troop
      * @return {Entity} Nearest enemy
      */
-    static nearestEnemy(entity, attackDefense) {
+    static nearestEnemy(entity) {
         let nearestDistance = Infinity;
         let nearest;
-        for (let curEntity of this.entities) {
-            if (this.getDistance(entity, curEntity) < nearestDistance && curEntity != entity) {
+        for (let curEntity of this.groundEntities.concat(entity.attackAir ? this.airEntities : [])) {
+            if (
+                this.getDistance(entity, curEntity) < nearestDistance &&    // if closest than before
+                curEntity != entity &&                                      // enemy not itself
+                curEntity.team != entity.team &&                            // enemy on a different team
+                entity.attackBuilding ? curEntity.isBuilding : true         // has to be building if it's attacking building
+            ) {
                 nearestDistance = this.getDistance(entity, curEntity);
                 nearest = curEntity;
             }
