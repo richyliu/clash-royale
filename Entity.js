@@ -122,12 +122,10 @@ class Entity {
      * everything else
      */
     setup() {
-        this.health = this.totalHealth;
+        this.draw();
         
-        this.shape = new createjs.Shape();
-        this.shape.x = this.x;
-        this.shape.y = this.y;
-        this.shape.graphics.beginFill(this.color).drawCircle(0, 0, this.size);
+        
+        this.health = this.totalHealth;
         
         this.healthBar = new createjs.Shape();
         this.healthBar.x = this.x - this.size;
@@ -135,6 +133,20 @@ class Entity {
         this.healthBar.graphics.beginFill(this.team ? 'blue' : 'red').drawRect(0, 0, this.size*2, 10);
         
         Field.add(this);
+    }
+    
+    
+    
+    /**
+     * How the entity is initialy drawn. Default is a circle of radius this.size
+     * and with a color of this.color. If changing, be sure to set this.shape to
+     * the shape that is drawn.
+     */
+    draw() {
+        this.shape = new createjs.Shape();
+        this.shape.x = this.x;
+        this.shape.y = this.y;
+        this.shape.graphics.beginFill(this.color).drawCircle(0, 0, this.size);
     }
     
     
@@ -183,7 +195,7 @@ class Entity {
     death() {
         // remove this from air/groundEntities
         let troops = Field[this.flyingTroop ? 'air' : 'ground' + 'Entities'];
-        troops.slice(troops.indexOf(this), 1);
+        troops.splice(troops.indexOf(this), 1);
         
         Field.stage.removeChild(this.shape);
         Field.stage.removeChild(this.healthBar);
@@ -204,7 +216,7 @@ class Entity {
     
     
     /**
-     * Called every game tick
+     * Called every tick by the Field
      */
     tick() {
         // if locked on target and target alive

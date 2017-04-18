@@ -27,18 +27,23 @@ class Field {
         this.loopTime = loopTime;
         
         
+        /**
+         * Main loop of the Field, ran every tick. Use Field.stop() to stop loop
+         * @private
+         */
         this.mainLoop = setInterval(() => {
-            this.groundEntities.concat(this.airEntities).forEach((entity, i) => {
-                entity.tick();
-            });
+            this.groundEntities.concat(this.airEntities).forEach(entity => entity.tick());
             this.stage.update();
         }, this.loopTime);
         
         
+        // Stop the main loop after a set amount of time.
         setTimeout(() => {
             this.stop();
         }, timeout);
         
+        
+        // Draw the field
         
         // two sides of the field
         const height = 300;
@@ -68,6 +73,7 @@ class Field {
     }
     
     
+    
     /**
      * Add entity to the field.
      * @type {Entity} entity - Entity to add to the field
@@ -80,6 +86,7 @@ class Field {
     }
     
     
+    
     /**
      * Stop the game loop
      */
@@ -87,6 +94,7 @@ class Field {
         console.log('Field has been stopped');
         clearInterval(this.mainLoop);
     }
+    
     
     
     /**
@@ -109,6 +117,7 @@ class Field {
         entity.y = y;
         return true;
     }
+    
     
     
     /**
